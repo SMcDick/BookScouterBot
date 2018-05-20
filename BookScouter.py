@@ -1,5 +1,6 @@
 # imported modules
 import json
+from time import sleep
 from sys import argv, exit
 from json import loads
 from urllib.request import urlopen
@@ -27,11 +28,26 @@ def checkPrices(isbn):
     # The response is a dictionary
     data = data['data']
    
-    print(data['Book']['Title'] + "-" + data['Book']['Isbn13'])
+    # If the search doesn't find any results the Book field will be null.
+    if data['Book'] is not None:
+    
+        # The results are always in decedning order of price so if the first isn't great than 0 none of them will be.
 
-    for item in data['Prices']:
-        if item['Price'] > 0:
-            print(item['Vendor']['Name'] + " " + str(item['Price']))
+        if data['Prices'][0]['Price'] > 0:
+            
+            print('---------------------------------')
+            
+            print(data['Book']['Title'] + "-" + data['Book']['Isbn13'])
+
+            for item in data['Prices']:
+                if item['Price'] > 0:
+                    print(item['Vendor']['Name'] + " " + str(item['Price']))
+    
+    else:
+    
+        print('---------------------------------')
+        print ('Invalid ISBN')
+    
 
 if __name__=="__main__":
 
@@ -39,4 +55,5 @@ if __name__=="__main__":
     with open('isbnList.txt', 'r') as isbnList:
         for isbn in isbnList:
             checkPrices(isbn)
+            sleep(5)
 
