@@ -4,6 +4,7 @@ from time import sleep
 from sys import argv, exit
 from json import loads
 from urllib.request import urlopen
+from urllib.error import URLError
 
 def checkPrices(isbn):
 
@@ -11,14 +12,16 @@ def checkPrices(isbn):
     # After looking at how the page functions:
     url = ("https://api.bookscouter.com/v3/prices/sell/%s" % isbn)
 
-    req = urlopen(url)
-    
-    # If the request failed, print error and why it failed, then close
-    if req.code != 200:
+    try:
+        req = urlopen(url)
+    # If there is an error print the URL, show error code and reason. 
+    except URLError:
+
+        print("This URL failed:", url)
         print("HTTP ERROR:", req.status_code)
         print("REASON:", req.reason)
-        exit()
-    
+        return
+
     # Continue if the request went through
     data = loads( req.read() )
 
@@ -27,12 +30,11 @@ def checkPrices(isbn):
 
     # The response is a dictionary
     data = data['data']
-   
+
     # If the search doesn't find any results the Book field will be null.
     if data['Book'] is not None:
     
         # The results are always in decedning order of price so if the first isn't great than 0 none of them will be.
-
         if data['Prices'][0]['Price'] > 0:
             
             print('---------------------------------')
@@ -47,7 +49,6 @@ def checkPrices(isbn):
     
         print('---------------------------------')
         print ('Invalid ISBN')
-    
 
 if __name__=="__main__":
 
